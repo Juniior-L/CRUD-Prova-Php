@@ -1,0 +1,110 @@
+/* === ESTILO GERAL === */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: 'Poppins', sans-serif;
+}
+
+body {
+  background-color: #f8f8f8;
+  color: #333;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+}
+
+/* === CONTAINER PRINCIPAL === */
+.container {
+  background: #fff;
+  border-radius: 16px;
+  box-shadow: 0 4px 25px rgba(0, 0, 0, 0.1);
+  width: 100%;
+  max-width: 400px;
+  padding: 40px;
+  text-align: center;
+  transition: transform 0.3s ease;
+}
+
+.container:hover {
+  transform: scale(1.01);
+}
+
+/* === TÍTULO === */
+h1 {
+  font-size: 2em;
+  color: #2f2f2f;
+  margin-bottom: 10px;
+}
+
+h1 span {
+  color: #d4af37;
+}
+
+p {
+  color: #666;
+  margin-bottom: 25px;
+  font-size: 0.95em;
+}
+
+/* === INPUTS === */
+form {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+input {
+  padding: 12px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  font-size: 0.95em;
+  transition: border-color 0.3s;
+}
+
+input:focus {
+  border-color: #d4af37;
+  outline: none;
+}
+
+/* === BOTÃO === */
+button {
+  background: linear-gradient(135deg, #d4af37, #c5a028);
+  color: white;
+  border: none;
+  padding: 12px;
+  border-radius: 8px;
+  font-size: 1em;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-weight: 500;
+}
+
+button:hover {
+  background: linear-gradient(135deg, #e0b93d, #b99522);
+  transform: translateY(-2px);
+}
+
+/* === LINKS === */
+a {
+  color: #d4af37;
+  text-decoration: none;
+  font-weight: 500;
+}
+
+a:hover {
+  text-decoration: underline;
+}
+
+/* === RESPONSIVO === */
+@media (max-width: 480px) {
+  .container {
+    margin: 20px;
+    padding: 30px;
+  }
+
+  h1 {
+    font-size: 1.6em;
+  }
+}
