@@ -1,110 +1,223 @@
-/* === ESTILO GERAL === */
+/* === RESET === */
 * {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
-  font-family: 'Poppins', sans-serif;
+  font-family: "Inter", sans-serif;
 }
 
+/* === BASE === */
 body {
-  background-color: #f8f8f8;
-  color: #333;
+  width: 100%;
+  height: 100vh;
+  overflow: hidden;
+  color: #1f1f1f;
+  background: #f9f9f9;
   display: flex;
-  justify-content: center;
-  align-items: center;
+}
+
+/* === CONTAINER DIVIDIDO === */
+.split-container {
+  display: flex;
+  width: 100%;
   height: 100vh;
 }
 
-/* === CONTAINER PRINCIPAL === */
-.container {
+/* === LADO ESQUERDO (BRANDING) === */
+.side.left {
+  flex: 6;
+  background: linear-gradient(135deg, #d4af37, #b99522);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 50px;
+}
+
+.branding h1 {
+  font-size: 3rem;
+  font-weight: 700;
+  letter-spacing: 1px;
+}
+
+.branding h1 span {
+  color: #fff;
+  font-weight: 800;
+}
+
+.branding p {
+  margin-top: 20px;
+  font-size: 1.2rem;
+  max-width: 400px;
+  opacity: 0.9;
+  line-height: 1.5;
+}
+
+/* === LADO DIREITO (FORMULÁRIO) === */
+.side.right {
+  flex: 4;
+  background: #fff;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 40px;
+}
+
+.form-box {
+  width: 100%;
+  max-width: 380px;
   background: #fff;
   border-radius: 16px;
-  box-shadow: 0 4px 25px rgba(0, 0, 0, 0.1);
-  width: 100%;
-  max-width: 400px;
   padding: 40px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
   text-align: center;
-  transition: transform 0.3s ease;
+  animation: fadeIn 0.6s ease;
 }
 
-.container:hover {
-  transform: scale(1.01);
-}
-
-/* === TÍTULO === */
-h1 {
-  font-size: 2em;
-  color: #2f2f2f;
+.form-box h2 {
+  font-size: 1.8rem;
   margin-bottom: 10px;
+  color: #2f2f2f;
 }
 
-h1 span {
+.form-box h2 span {
   color: #d4af37;
 }
 
-p {
+.form-box p {
   color: #666;
   margin-bottom: 25px;
-  font-size: 0.95em;
+  font-size: 0.95rem;
 }
 
-/* === INPUTS === */
+/* === FORM === */
 form {
   display: flex;
   flex-direction: column;
   gap: 15px;
 }
 
-input {
-  padding: 12px;
+form input {
+  padding: 14px;
   border: 1px solid #ddd;
-  border-radius: 8px;
-  font-size: 0.95em;
-  transition: border-color 0.3s;
+  border-radius: 10px;
+  font-size: 0.95rem;
+  transition: all 0.3s ease;
+  background: #fafafa;
 }
 
-input:focus {
+form input:focus {
   border-color: #d4af37;
+  background: #fff;
+  box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.15);
   outline: none;
 }
 
 /* === BOTÃO === */
-button {
+.btn-primary {
   background: linear-gradient(135deg, #d4af37, #c5a028);
-  color: white;
+  color: #fff;
   border: none;
-  padding: 12px;
-  border-radius: 8px;
-  font-size: 1em;
+  border-radius: 10px;
+  padding: 14px;
+  font-size: 1rem;
+  font-weight: 600;
   cursor: pointer;
-  transition: all 0.3s ease;
-  font-weight: 500;
+  transition: transform 0.2s ease, background 0.3s ease;
 }
 
-button:hover {
+.btn-primary:hover {
   background: linear-gradient(135deg, #e0b93d, #b99522);
   transform: translateY(-2px);
 }
 
-/* === LINKS === */
-a {
-  color: #d4af37;
-  text-decoration: none;
-  font-weight: 500;
+/* === LINK === */
+.swap-link {
+  margin-top: 20px;
+  font-size: 0.9rem;
+  color: #555;
 }
 
-a:hover {
+.swap-link a {
+  color: #d4af37;
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.swap-link a:hover {
   text-decoration: underline;
 }
 
-/* === RESPONSIVO === */
-@media (max-width: 480px) {
-  .container {
-    margin: 20px;
-    padding: 30px;
+/* === ANIMAÇÃO === */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* === DARK MODE === */
+@media (prefers-color-scheme: dark) {
+  body {
+    background: #1b1b1b;
+    color: #f3f3f3;
   }
 
-  h1 {
-    font-size: 1.6em;
+  .side.left {
+    background: linear-gradient(135deg, #d4af37, #8f7c29);
+  }
+
+  .side.right {
+    background: #242424;
+  }
+
+  .form-box {
+    background: #2a2a2a;
+    box-shadow: 0 8px 32px rgba(255, 255, 255, 0.05);
+  }
+
+  form input {
+    background: #1f1f1f;
+    border: 1px solid #3a3a3a;
+    color: #f3f3f3;
+  }
+
+  form input:focus {
+    border-color: #d4af37;
+    box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.25);
+  }
+
+  .swap-link {
+    color: #ccc;
+  }
+}
+
+/* === RESPONSIVO === */
+@media (max-width: 900px) {
+  .split-container {
+    flex-direction: column;
+  }
+
+  .side.left {
+    flex: none;
+    height: 40vh;
+  }
+
+  .side.right {
+    flex: none;
+    height: 60vh;
+  }
+
+  .branding h1 {
+    font-size: 2.2rem;
+  }
+
+  .form-box {
+    box-shadow: none;
   }
 }

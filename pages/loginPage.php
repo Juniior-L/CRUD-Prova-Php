@@ -1,27 +1,49 @@
+<?php
+session_start();
+if (isset($_SESSION['user'])) {
+    header('Location: home.php');
+    exit;
+}
+?>
 <!DOCTYPE html>
 <html lang="pt-br">
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login</title>
+    <title>Entrar - TaskManager</title>
     <link rel="stylesheet" href="../style/login.css">
 </head>
 
 <body>
-    <div class="container">
-        <h1><span>Welcome</span></h1>
-        <p>Log in to continue</p>
+    <div class="split-container">
 
-        <form action="../api/login.php" method="POST">
-            <input type="hidden" name="tipo" value="login">
-            <input type="email" name="email" placeholder="e-mail" required>
-            <input type="password" name="password" placeholder="password" required>
+        <div class="side left">
+            <div class="branding">
+                <h1><span>Flow</span>Forge</h1>
+                <p>Organize suas ideias. Simplifique sua rotina.</p>
+            </div>
+        </div>
 
-            <button type="submit">Log in</button>
-        </form>
+        <!-- LADO DIREITO (LOGIN) -->
+        <div class="side right">
+            <div class="form-box">
+                <h2><span>Bem-vindo</span> de volta</h2>
+                <p>Entre para continuar organizando suas tarefas</p>
 
-        <p style="margin-top: 15px;">Don't have an account? <a href="../pages/registerPage.php">Sign Up</a></p>
+                <form action="../api/login.php" method="POST">
+                    <input type="hidden" name="tipo" value="login">
+                    <input type="email" name="email" placeholder="Seu e-mail" required>
+                    <input type="password" name="password" placeholder="Sua senha" required>
+
+                    <button type="submit" class="btn-primary">Entrar</button>
+                </form>
+
+                <p class="swap-link">Não tem uma conta?
+                    <a href="../pages/registerPage.php">Cadastre-se</a>
+                </p>
+            </div>
+        </div>
     </div>
 </body>
 
