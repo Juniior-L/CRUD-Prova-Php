@@ -2,8 +2,16 @@
 require_once __DIR__ . '/../../CRUD-Prova-Php/config/config.php';
 require_once __DIR__ . '/../../CRUD-Prova-Php/config/database.php';
 
-if (session_status() !== PHP_SESSION_ACTIVE)
-    session_start();
+if (session_status() !== PHP_SESSION_ACTIVE) session_start();
+
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['toggle_theme'])) {
+    $current = $_SESSION['theme'] ?? 'light';
+    $_SESSION['theme'] = ($current === 'dark') ? 'light' : 'dark';
+
+    header('Location: ' . $_SERVER['PHP_SELF']);
+    exit;
+}
 
 if (!isset($_SESSION['user'])) {
     header('Location: ../pages/loginPage.php');
@@ -17,6 +25,14 @@ $userId = (int) $_SESSION['user']['id'];
 $resposta = $db->read('tasks', ['user_id' => $userId]);
 $tasks = $resposta['success'] ? $resposta['data'] : [];
 
+// Modal open 
+$openModal = isset($_POST['abrir']) || isset($_POST['abrir_edit']);
+$editId = $_POST['edit_id'] ?? '';
+$editTitle = $_POST['edit_title'] ?? '';
+$editNote = $_POST['edit_note'] ?? '';
+
+// Theme class
+$themeClass = (isset($_SESSION['theme']) && $_SESSION['theme'] === 'dark') ? 'dark-theme' : 'light-theme';
 ?>
 <!DOCTYPE html>
 <html lang="pt-br">
@@ -26,17 +42,35 @@ $tasks = $resposta['success'] ? $resposta['data'] : [];
     <title>Minhas Tarefas</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="../style/home.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
 </head>
 
-<body>
+<body class="<?= htmlspecialchars($themeClass) ?>">
     <header class="main-header">
         <div class="header-left">
-            📋 <span>Minhas Tarefas</span>
+            <div class="brand">📋 <span>Minhas Tarefas</span></div>
+            <div class="subtext">Organize. Faça. Repita.</div>
         </div>
-        <form action="../api/login.php" method="POST" class="logout-form">
-            <input type="hidden" name="tipo" value="logout">
-            <button type="submit" class="logout-btn">Sair</button>
-        </form>
+
+        <div class="header-right">
+            <!-- Theme toggle -->
+            <form method="POST" class="theme-form" style="display:inline;">
+                <input type="hidden" name="toggle_theme" value="1">
+                <button type="submit" class="theme-btn" title="Alternar tema">
+                    <?php if (isset($_SESSION['theme']) && $_SESSION['theme'] === 'dark'): ?>
+                        ☀️
+                    <?php else: ?>
+                        🌙
+                    <?php endif; ?>
+                </button>
+            </form>
+
+            <!-- Logout -->
+            <form action="../api/login.php" method="POST" class="logout-form" style="display:inline;">
+                <input type="hidden" name="tipo" value="logout">
+                <button type="submit" class="logout-btn">Sair</button>
+            </form>
+        </div>
     </header>
 
     <main class="content-area">
@@ -62,6 +96,7 @@ $tasks = $resposta['success'] ? $resposta['data'] : [];
                                 <input type="hidden" name="tipo" value="delete">
                                 <button class="btn-delete" title="Deletar">🗑️</button>
                             </form>
+
                             <form method="POST">
                                 <input type="hidden" name="abrir_edit" value="1">
                                 <input type="hidden" name="edit_id" value="<?= $task['id'] ?>">
@@ -80,15 +115,8 @@ $tasks = $resposta['success'] ? $resposta['data'] : [];
 
     <form method="post" class="fab-form">
         <input type="hidden" name="abrir" value="1">
-        <button type="submit" class="fab">＋</button>
+        <button type="submit" class="fab" title="Nova tarefa">＋</button>
     </form>
-
-    <?php
-    $openModal = isset($_POST['abrir']) || isset($_POST['abrir_edit']);
-    $editId = $_POST['edit_id'] ?? '';
-    $editTitle = $_POST['edit_title'] ?? '';
-    $editNote = $_POST['edit_note'] ?? '';
-    ?>
 
     <!-- MODAL -->
     <div id="popup" class="<?= $openModal ? 'active' : '' ?>">
@@ -105,11 +133,9 @@ $tasks = $resposta['success'] ? $resposta['data'] : [];
                 <h2>Editar Tarefa</h2>
                 <form method="POST" action="../api/tasks.php" class="task-form">
                     <input type="hidden" name="tipo" value="update">
-                    <input type="hidden" name="id" value="<?= $editId ?>">
-                    <input type="text" name="title" placeholder="Título" value="<?= htmlspecialchars($editTitle) ?>"
-                        required>
-                    <textarea name="note" placeholder="Descrição" rows="4"
-                        required><?= htmlspecialchars($editNote) ?></textarea>
+                    <input type="hidden" name="id" value="<?= htmlspecialchars($editId) ?>">
+                    <input type="text" name="title" placeholder="Título" value="<?= htmlspecialchars($editTitle) ?>" required>
+                    <textarea name="note" placeholder="Descrição" rows="4" required><?= htmlspecialchars($editNote) ?></textarea>
                     <button type="submit" class="btn-primary">Salvar</button>
                 </form>
             <?php endif; ?>
@@ -120,6 +146,5 @@ $tasks = $resposta['success'] ? $resposta['data'] : [];
         </div>
     </div>
 </body>
-
 
 </html>
