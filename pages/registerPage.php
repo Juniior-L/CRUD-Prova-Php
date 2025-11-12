@@ -1,23 +1,24 @@
 <?php
 session_start();
+
 if (isset($_SESSION['user'])) {
     header('Location: ../pages/homePage.php');
     exit;
 }
+
+$flash = $_SESSION['flash'] ?? null;
+unset($_SESSION['flash']);
 ?>
 <!DOCTYPE html>
 <html lang="pt-br">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Cadastrar - TaskManager</title>
     <link rel="stylesheet" href="../style/login.css">
 </head>
-
 <body>
     <div class="split-container">
-
         <div class="side left">
             <div class="branding">
                 <h1><span>Flow</span>Forge</h1>
@@ -30,12 +31,17 @@ if (isset($_SESSION['user'])) {
                 <h2><span>Crie</span> sua conta ✨</h2>
                 <p>Preencha os dados abaixo</p>
 
+                <?php if ($flash): ?>
+                    <div class="flash-message <?= $flash['success'] ? 'success' : 'error' ?>">
+                        <?= htmlspecialchars($flash['message']) ?>
+                    </div>
+                <?php endif; ?>
+
                 <form action="../api/login.php" method="POST">
                     <input type="hidden" name="tipo" value="insert">
                     <input type="text" name="name" placeholder="Nome completo" required>
                     <input type="email" name="email" placeholder="Seu e-mail" required>
                     <input type="password" name="password" placeholder="Crie uma senha" required>
-
                     <button type="submit" class="btn-primary">Cadastrar</button>
                 </form>
 
@@ -46,5 +52,4 @@ if (isset($_SESSION['user'])) {
         </div>
     </div>
 </body>
-
 </html>

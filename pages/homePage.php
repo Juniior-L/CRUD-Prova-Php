@@ -48,7 +48,7 @@ $themeClass = (isset($_SESSION['theme']) && $_SESSION['theme'] === 'dark') ? 'da
 <body class="<?= htmlspecialchars($themeClass) ?>">
     <header class="main-header">
         <div class="header-left">
-            <div class="brand">📋 <span>Minhas Tarefas</span></div>
+            <div class="brand">📋 <span>Flow Forge</span></div>
             <div class="subtext">Organize. Faça. Repita.</div>
         </div>
 

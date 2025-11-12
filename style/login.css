@@ -91,6 +91,57 @@ body {
   font-size: 0.95rem;
 }
 
+/* === FLASH MESSAGES (refinado) === */
+.flash-message {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+
+  margin: 0 auto 16px auto;
+  padding: 10px 14px;
+
+  border-radius: 8px;
+  font-size: 0.85rem;
+  font-weight: 500;
+  letter-spacing: 0.2px;
+
+  animation: fadeIn 0.6s ease, fadeOut 0.5s ease 4.5s forwards;
+  backdrop-filter: blur(8px);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  max-width: 280px;
+  text-align: center;
+}
+
+/* Ícones minimalistas e pequenos */
+.flash-message::before {
+  font-size: 0.95rem;
+  opacity: 0.75;
+}
+
+/* Sucesso */
+.flash-message.success {
+  background: rgba(212, 175, 55, 0.1);
+  border: 1px solid rgba(212, 175, 55, 0.3);
+  color: #b8911c;
+}
+
+.flash-message.success::before {
+  content: "✔";
+}
+
+/* Erro */
+.flash-message.error {
+  background: rgba(255, 87, 87, 0.08);
+  border: 1px solid rgba(255, 87, 87, 0.25);
+  color: #c0392b;
+}
+
+.flash-message.error::before {
+  content: "✖";
+}
+
+
 /* === FORM === */
 form {
   display: flex;
@@ -155,6 +206,7 @@ form input:focus {
     opacity: 0;
     transform: translateY(20px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
@@ -195,7 +247,20 @@ form input:focus {
   .swap-link {
     color: #ccc;
   }
+
+  .flash-message.success {
+    background: rgba(212, 175, 55, 0.15);
+    border: 1px solid rgba(212, 175, 55, 0.3);
+    color: #e9c956;
+  }
+
+  .flash-message.error {
+    background: rgba(255, 87, 87, 0.18);
+    border: 1px solid rgba(255, 87, 87, 0.35);
+    color: #ff7676;
+  }
 }
+
 
 /* === RESPONSIVO === */
 @media (max-width: 900px) {

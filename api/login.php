@@ -1,63 +1,77 @@
 <?php
 require_once __DIR__ . '/../config/loginDao.php';
 
-header('Content-Type: application/json; charset=utf-8');
-
-header('Access-Control-Allow-Origin: *');
-header('Access-Control-Allow-Methods: GET, POST, OPTIONS');
-header('Access-Control-Allow-Headers: Content-Type, Authorization');
+if (session_status() !== PHP_SESSION_ACTIVE) {
+    session_start();
+}
 
 $login = new Login();
 
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $tipo = $_POST['tipo'] ?? null;
+function setFlash($message, $success = true)
+{
+    $_SESSION['flash'] = [
+        'message' => $message,
+        'success' => $success
+    ];
+}
 
-    if ($tipo === 'insert') {
-        $res = $login->createUser($_POST['name'] ?? '', $_POST['email'] ?? '', $_POST['password'] ?? '');
-        if ($res['success']) {
-            echo "<script>alert('Usuário cadastrado com sucesso!'); window.location.href='../pages/loginPage.php';</script>";
-        } else {
-            echo "<script>alert('{$res['message']}'); history.back();</script>";
-        }
-        exit;
-    }
-
-    if ($tipo === 'login') {
-        $res = $login->loginUser($_POST['email'] ?? '', $_POST['password'] ?? '');
-
-        if ($res['success']) {
-            // se veio de form tradicional, redirecionar
-            if (strpos($_SERVER['HTTP_ACCEPT'] ?? '', 'application/json') !== false) {
-                echo json_encode($res, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
-            } else {
-                header('Location: ../pages/homePage.php');
-            }
-        } else {
-            if (strpos($_SERVER['HTTP_ACCEPT'] ?? '', 'application/json') !== false) {
-                echo json_encode($res, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
-            } else {
-                echo "<script>alert('{$res['message']}'); history.back();</script>";
-            }
-        }
-        exit;
-    }
-
-    if ($tipo === 'logout') {
-        $res = $login->logout();
-        header('Location: ../pages/loginPage.php');
-        exit;
-    }
-
-    echo json_encode(["success" => false, "message" => "Operação inválida"], JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
+function redirect($url)
+{
+    header("Location: $url");
     exit;
 }
 
-if ($_SERVER['REQUEST_METHOD'] === 'GET') {
-    if (session_status() !== PHP_SESSION_ACTIVE)
-        session_start();
-    if (isset($_SESSION['user'])) {
-        echo json_encode(["success" => true, "user" => $_SESSION['user']], JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
-    } else {
-        echo json_encode(["success" => false, "message" => "Sem sessão"], JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
+$method = $_SERVER['REQUEST_METHOD'] ?? 'GET';
+
+if ($method === 'POST') {
+    $tipo = $_POST['tipo'] ?? null;
+
+    if ($tipo === 'insert') {
+        $name = trim($_POST['name'] ?? '');
+        $email = trim($_POST['email'] ?? '');
+        $password = trim($_POST['password'] ?? '');
+
+        $res = $login->createUser($name, $email, $password);
+
+        if ($res['success']) {
+            setFlash('Usuário cadastrado com sucesso! Faça login.');
+            redirect('../pages/loginPage.php');
+        } else {
+            setFlash($res['message'] ?? 'Erro ao cadastrar usuário.', false);
+            redirect('../pages/registerPage.php');
+        }
     }
+
+    if ($tipo === 'login') {
+        $email = trim($_POST['email'] ?? '');
+        $password = trim($_POST['password'] ?? '');
+
+        $res = $login->loginUser($email, $password);
+
+        if ($res['success']) {
+            redirect('../pages/homePage.php');
+        } else {
+            setFlash($res['message'] ?? 'Credenciais inválidas.', false);
+            redirect('../pages/loginPage.php');
+        }
+    }
+
+    if ($tipo === 'logout') {
+        $login->logout();
+        setFlash('Logout realizado com sucesso!');
+        redirect('../pages/loginPage.php');
+    }
+
+    setFlash('Operação inválida.', false);
+    redirect('../pages/loginPage.php');
+}
+
+if ($method === 'GET') {
+    header('Content-Type: application/json; charset=utf-8');
+    if (isset($_SESSION['user'])) {
+        echo json_encode(['success' => true, 'user' => $_SESSION['user']], JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
+    } else {
+        echo json_encode(['success' => false, 'message' => 'Sem sessão'], JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
+    }
+    exit;
 }
