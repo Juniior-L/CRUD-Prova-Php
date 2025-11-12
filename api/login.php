@@ -1,70 +1,63 @@
 <?php
-require_once '../config/database.php';
-require_once '../config/loginDao.php';
+require_once __DIR__ . '/../config/loginDao.php';
 
 header('Content-Type: application/json; charset=utf-8');
+
 header('Access-Control-Allow-Origin: *');
-header('Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS');
+header('Access-Control-Allow-Methods: GET, POST, OPTIONS');
 header('Access-Control-Allow-Headers: Content-Type, Authorization');
 
 $login = new Login();
-$database = Database::getInstance();
 
-if ($_SERVER["REQUEST_METHOD"] == "GET") {
-    $users = $database->read("users");
-    if ($users["success"] !== false) {
-        echo json_encode(['success' => true, 'data' => $users, 'message' => 'Users recuperados com sucesso'], JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
-    } else {
-        echo json_encode(['success' => false, 'data' => null, 'message' => 'Erro ao recuperar usuários'], JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $tipo = $_POST['tipo'] ?? null;
+
+    if ($tipo === 'insert') {
+        $res = $login->createUser($_POST['name'] ?? '', $_POST['email'] ?? '', $_POST['password'] ?? '');
+        if ($res['success']) {
+            echo "<script>alert('Usuário cadastrado com sucesso!'); window.location.href='../pages/loginPage.php';</script>";
+        } else {
+            echo "<script>alert('{$res['message']}'); history.back();</script>";
+        }
+        exit;
     }
-} else if ($_SERVER["REQUEST_METHOD"] === "POST") {
-    $input = $_POST;
 
-    switch ($input["tipo"]) {
-        case 'insert':
-            $resposta = $login->createUser(
-                $input["name"] ?? '',
-                $input["email"] ?? '',
-                $input["password"] ?? ''
-            );
+    if ($tipo === 'login') {
+        $res = $login->loginUser($_POST['email'] ?? '', $_POST['password'] ?? '');
 
-            if ($resposta["success"]) {
-                $_SESSION["msg"] = "Usuário cadastrado com sucesso!";
-                header("Location: ../pages/loginPage.php");
-                exit();
+        if ($res['success']) {
+            // se veio de form tradicional, redirecionar
+            if (strpos($_SERVER['HTTP_ACCEPT'] ?? '', 'application/json') !== false) {
+                echo json_encode($res, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
             } else {
-                $_SESSION["msg"] = "Erro: " . $resposta["message"];
-                header("Location: ../pages/registerPage.php");
-                exit();
+                header('Location: ../pages/homePage.php');
             }
-
-        case 'login':
-            $resposta = $login->loginUser(
-                $input["email"] ?? '',
-                $input["password"] ?? ''
-            );
-
-            if ($resposta["success"]) {
-                $_SESSION["user"] = $resposta["user"];
-                header("Location: ../pages/homePage.php");
-                exit();
+        } else {
+            if (strpos($_SERVER['HTTP_ACCEPT'] ?? '', 'application/json') !== false) {
+                echo json_encode($res, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
             } else {
-                $_SESSION["msg"] = "Erro: " . $resposta["message"];
-                echo json_encode(["success" => false, "data" => null, "message" => $resposta["message"]], JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
-                exit();
+                echo "<script>alert('{$res['message']}'); history.back();</script>";
             }
+        }
+        exit;
+    }
 
-        case 'logout':
-            $resposta = $login->logout();
-            if ($resposta["success"] !== false) {
-                echo json_encode(["success" => true, "data" => $resposta, "message" => "Usuário deslogado com sucesso"], JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
-            } else {
-                echo json_encode(["success" => false, "data" => null, "message" => $resposta["message"]], JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
-            }
-            exit();
+    if ($tipo === 'logout') {
+        $res = $login->logout();
+        header('Location: ../pages/loginPage.php');
+        exit;
+    }
 
-        default:
-            echo json_encode(["success" => false, "data" => null, "message" => $resposta["message"]], JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
-            exit();
+    echo json_encode(["success" => false, "message" => "Operação inválida"], JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
+    exit;
+}
+
+if ($_SERVER['REQUEST_METHOD'] === 'GET') {
+    if (session_status() !== PHP_SESSION_ACTIVE)
+        session_start();
+    if (isset($_SESSION['user'])) {
+        echo json_encode(["success" => true, "user" => $_SESSION['user']], JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
+    } else {
+        echo json_encode(["success" => false, "message" => "Sem sessão"], JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
     }
 }

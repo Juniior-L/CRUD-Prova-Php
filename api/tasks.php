@@ -1,54 +1,94 @@
 <?php
+require_once __DIR__ . '/../config/database.php';
 
-include("../../CRUD-Prova-Php/config/config.php");
-include("../../CRUD-Prova-Php/config/database.php");
+if (session_status() !== PHP_SESSION_ACTIVE) session_start();
 
-$database = Database::getInstance();
+$db = Database::getInstance();
 
-header('Content-Type: application/json; charset=utf-8');
-header('Access-Control-Allow-Origin: *');
-header('Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS');
-header('Access-Control-Allow-Headers: Content-Type, Authorization');
-
-if ($_SERVER["REQUEST_METHOD"] == "GET") {
-    $tasks = $database->read("tasks");
-    if ($tasks["success"] !== false) {
-        echo json_encode(['success' => true, 'data' => $tasks, 'message' => 'Tasks recuperados com sucesso'], JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
-    } else {
-        echo json_encode(['success' => false, 'data' => null, 'message' => 'Erro ao recuperar usuários'], JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
-    }
-} else if ($_SERVER["REQUEST_METHOD"] == "POST") {
-    $input = $_POST;
-
-    switch ($_POST["tipo"]) {
-        case 'insert':
-            $resposta = $database->create('tasks', ["title" => $input["title"], "note" => $input["note"]]);
-
-            if ($resposta["success"] !== false) {
-                
-            } else {
-                echo json_encode(["success" => false, "data" => null, "message" => $resposta["message"]], JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
-            }
-            exit();
-        case 'update':
-            $resposta = $database->update('tasks', ["title" => $input["title"], "note" => $input["note"]], ["id" => $input["id"]]);
-            if ($resposta["success"] !== false) {
-                echo json_encode(["success" => true, "data" => $resposta, "message" => "Tarefa atualizada com sucesso"], JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
-            } else {
-                echo json_encode(["success" => false, "data" => null, "message" => $resposta["message"]], JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
-            }
-            exit();
-        case 'delete':
-            $resposta = $database->delete("tasks", ["id" => $input["id"]]);
-            if ($resposta["success"] !== false) {
-                echo json_encode(["success" => true, "data" => $resposta, "message" => "Tarefa deletada com sucesso"], JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
-            } else {
-                echo json_encode(["success" => false, "data" => null, "message" => $resposta["message"]], JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
-            }
-            exit();
-    }
-
+if (!isset($_SESSION['user'])) {
+    header('Location: ../pages/loginPage.php');
+    exit;
 }
 
+$userId = (int)$_SESSION['user']['id'];
+$method = $_SERVER['REQUEST_METHOD'];
 
-?>
+function redirectWithMessage($message, $success = true) {
+    $_SESSION['flash'] = [
+        'message' => $message,
+        'success' => $success
+    ];
+    header('Location: ../pages/homePage.php');
+    exit;
+}
+
+if ($method === 'POST') {
+    $tipo = $_POST['tipo'] ?? null;
+
+    if ($tipo === 'insert') {
+        $title = trim($_POST['title'] ?? '');
+        $note = trim($_POST['note'] ?? '');
+
+        if (empty($title) || empty($note)) {
+            redirectWithMessage('Preencha todos os campos!', false);
+        }
+
+        $arr = [
+            'title' => $title,
+            'note' => $note,
+            'register' => date('Y-m-d H:i:s'),
+            'user_id' => $userId
+        ];
+
+        $res = $db->create('tasks', $arr);
+        if ($res['success']) {
+            redirectWithMessage('Tarefa criada com sucesso!');
+        } else {
+            redirectWithMessage('Erro ao criar tarefa: ' . ($res['message'] ?? ''), false);
+        }
+    }
+
+    if ($tipo === 'update') {
+        $id = (int)($_POST['id'] ?? 0);
+        $title = trim($_POST['title'] ?? '');
+        $note = trim($_POST['note'] ?? '');
+
+        if (empty($id) || empty($title) || empty($note)) {
+            redirectWithMessage('Dados inválidos para atualização.', false);
+        }
+
+        $check = $db->read('tasks', ['id' => $id, 'user_id' => $userId]);
+        if (empty($check['data'])) {
+            redirectWithMessage('Tarefa não encontrada ou sem permissão.', false);
+        }
+
+        $res = $db->update('tasks', [
+            'title' => $title,
+            'note' => $note
+        ], ['id' => $id, 'user_id' => $userId]);
+
+        if ($res['success']) {
+            redirectWithMessage('Tarefa atualizada com sucesso!');
+        } else {
+            redirectWithMessage('Erro ao atualizar tarefa: ' . ($res['message'] ?? ''), false);
+        }
+    }
+
+    if ($tipo === 'delete') {
+        $id = (int)($_POST['id'] ?? 0);
+
+        $check = $db->read('tasks', ['user_id' => $userId, 'id' => $id]);
+        if (empty($check['data'])) {
+            redirectWithMessage('Tarefa não encontrada ou sem permissão.', false);
+        }
+
+        $res = $db->delete('tasks', ['id' => $id, 'user_id' => $userId]);
+        if ($res['success']) {
+            redirectWithMessage('Tarefa deletada com sucesso!');
+        } else {
+            redirectWithMessage('Erro ao deletar tarefa: ' . ($res['message'] ?? ''), false);
+        }
+    }
+}
+
+redirectWithMessage('Ação inválida.', false);
