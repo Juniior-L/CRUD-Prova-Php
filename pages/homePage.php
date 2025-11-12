@@ -53,6 +53,7 @@ $themeClass = (isset($_SESSION['theme']) && $_SESSION['theme'] === 'dark') ? 'da
         </div>
 
         <div class="header-right">
+            <div class="subtext">Olá, <?=$_SESSION['user']['nome']?></div>
             <!-- Theme toggle -->
             <form method="POST" class="theme-form" style="display:inline;">
                 <input type="hidden" name="toggle_theme" value="1">
